@@ -1,10 +1,8 @@
 #!/bin/bash
-# Start een virtuele display
-Xvfb :1 -screen 0 1024x768x16 &
-export DISPLAY=:1
+# Start de VNC server op display :1
+vncserver :1 -geometry 1280x800 -depth 16
 
-# Start een lichte desktop omgeving
-xfce4-session &
+# Start de web-bridge (noVNC) op poort 7860
+# noVNC verbindt met de VNC server op poort 5901 (display :1)
+/usr/share/novnc/utils/launch.sh --vnc localhost:5901 --listen 7860
 
-# Start de web-bridge (noVNC) op poort 7860 voor Hugging Face
-/usr/share/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 7860
