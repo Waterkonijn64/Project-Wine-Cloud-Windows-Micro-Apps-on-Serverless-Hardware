@@ -15,21 +15,21 @@ RUN apt-get update && apt-get install -y \
     curl \
     && apt-get clean
 
-# Setup VNC-server configuratie
-mkdir -p ~/.vnc
-echo "password" | vncpasswd -f > ~/.vnc/passwd
-chmod 600 ~/.vnc/passwd
+# Setup VNC-server configuratie (Nu met RUN commando's)
+RUN mkdir -p /root/.vnc
+RUN echo "password" | vncpasswd -f > /root/.vnc/passwd
+RUN chmod 600 /root/.vnc/passwd
 
 # Kopieer het startscript
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Werkmap instellen
-WORKDIR /home/user
-USER root
+WORKDIR /root
 
 # Poort voor Hugging Face
 EXPOSE 7860
 
-# Start alles op
-CMD ["/usr/bin/bash", "-c", "vncserver :1 -geometry 1280x800 -depth 16 && /entrypoint.sh"]
+# Start alles op via het script
+CMD ["/entrypoint.sh"]
+
