@@ -1,35 +1,27 @@
 FROM ubuntu:22.04
 
-# Voorkom interactie tijdens installatie
 ENV DEBIAN_FRONTEND=noninteractive
+# Fix voor de 'USER environment variable' error
+ENV USER=user
 
-# Installeer Wine, Desktop en noVNC
 RUN apt-get update && apt-get install -y \
-    wine \
-    xfce4 \
-    xfce4-terminal \
-    tightvncserver \
-    novnc \
-    python3-websockify \
-    wget \
-    curl \
+    wine xfce4 xfce4-terminal tightvncserver \
+    novnc python3-websockify wget curl fluxbox \
     && apt-get clean
 
-# Setup VNC-server configuratie (Nu met RUN commando's)
-RUN mkdir -p /root/.vnc
-RUN echo "password" | vncpasswd -f > /root/.vnc/passwd
-RUN chmod 600 /root/.vnc/passwd
+RUN useradd -m -u 1000 user
+WORKDIR /home/user
 
-# Kopieer het startscript
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# VNC setup
+RUN mkdir -p /home/user/.vnc
+RUN echo "password" | vncpasswd -f > /home/user/.vnc/passwd
+RUN chmod 600 /home/user/.vnc/passwd
+RUN chown -R user:user /home/user/
 
-# Werkmap instellen
-WORKDIR /root
+COPY --chown=user:user entrypoint.sh /home/user/entrypoint.sh
+RUN chmod +x /home/user/entrypoint.sh
 
-# Poort voor Hugging Face
+USER user
 EXPOSE 7860
 
-# Start alles op via het script
-CMD ["/entrypoint.sh"]
-
+CMD ["/bin/bash", "/home/user/entrypoint.sh"]
